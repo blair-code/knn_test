@@ -12,7 +12,7 @@ pub mod data_loader {
         type Feature;
         type Predictor;
         fn load_all_samples(&self, filepaths: Vec<&str>) -> (Vec<Vec<Self::Feature>>, Vec<Self::Predictor>);
-        fn vecs_as_matrices(&self, features: Vec<Vec<Self::Feature>>) -> Matrix<Self::Feature> {
+        fn vecs_as_matrix(&self, features: Vec<Vec<Self::Feature>>) -> Matrix<Self::Feature> {
             let samplecount = features.len();
             let featurescount = if samplecount > 0 {features[0].len()} else {0};
             let flattened_features = features.into_iter().flat_map(|x| x).collect();
