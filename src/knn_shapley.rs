@@ -47,11 +47,9 @@ pub mod knn_shapley {
         assert_eq!(test_features.rows(), test_labels.size());
         assert_eq!(training_features.cols(), test_features.cols());
 
-        let shap_from_dists: Vec<Vector<f64>> = test_features.iter_rows().enumerate()
+        test_features.iter_rows().enumerate()
                      .map(|(idx, row)| (idx, distance_from_sample(&training_features, &Vector::new(row)) ))
                      .map(|(idx, dist)| shapleys_from_distances(dist, training_labels, test_labels[idx], k))
-                     .collect();
-        //shap_from_dists
-        shap_from_dists.iter().fold::<Vector<f64>,_>(Vector::new(vec![0.0;training_labels.size()]), |sum_vec, shapleys| sum_vec + shapleys)
+                     .fold::<Vector<f64>,_>(Vector::new(vec![0.0;training_labels.size()]), |sum_vec, shapleys| sum_vec + shapleys)
     }
 }
