@@ -11,7 +11,17 @@ pub mod data_loader {
     pub trait DataLoader {
         type Feature;
         type Predictor;
-        fn load_all_samples_from_disk(&self, filepaths: Vec<&str>) -> (Matrix<Self::Feature>,Vector<Self::Predictor>);
+        fn load_all_samples(&self, filepaths: Vec<&str>) -> (Vec<Vec<Self::Feature>>, Vec<Self::Predictor>);
+        fn vecs_as_matrices(&self, features: Vec<Vec<Self::Feature>>) -> Matrix<Self::Feature> {
+            let samplecount = features.len();
+            let featurescount = if samplecount > 0 {features[0].len()} else {0};
+            let flattened_features = features.into_iter().flat_map(|x| x).collect();
+            Matrix::new::<Vec<Self::Feature>>(samplecount, featurescount, flattened_features)
+        }
+
+        fn vec_as_vector(&self, predictors: Vec<Self::Predictor>) -> Vector<Self::Predictor> {
+            Vector::new(predictors)
+        }
     }
 
     pub struct CSVLoader {
@@ -23,12 +33,11 @@ pub mod data_loader {
     impl DataLoader for CSVLoader{
         type Feature = f64;
         type Predictor = u32;
-        fn load_all_samples_from_disk(&self, filepaths: Vec<&str>) -> (Matrix<Self::Feature>,Vector<Self::Predictor>) {
+        fn load_all_samples(&self, filepaths: Vec<&str>) -> (Vec<Vec<Self::Feature>>, Vec<Self::Predictor>) {
             
             let mut all_features = Vec::new();
             let mut all_predictors = Vec::new();
-            let mut samplecount = 0;
-            let mut featurecount = None;
+
             for path in filepaths.iter() {
                 let mut rdr = csv::ReaderBuilder::new()
                                 .has_headers(self.has_headers)
@@ -41,10 +50,7 @@ pub mod data_loader {
                 for rec in rdr.records() {
                     let rr = rec.unwrap();
                     let mut rec_vec = Vec::new();
-                    match featurecount {
-                        None => featurecount = Some(rr.len() - 1),
-                        Some(_) => (),
-                    };
+
                     for i in 0..rr.len() {
                         if i != self.predictor_column_index {
                             rec_vec.push(rr.get(i).unwrap().parse::<Self::Feature>().unwrap());
@@ -52,17 +58,11 @@ pub mod data_loader {
                             all_predictors.push(rr.get(i).unwrap().parse::<Self::Predictor>().unwrap());
                         }
                     }
-                    samplecount += 1;
                     all_features.push(rec_vec.to_owned());
                 }
             }
-            
-            println!("samplecount {} featurecount {}", samplecount, featurecount.unwrap());
-            let flattened_features = all_features.iter().flat_map(|x| x.to_owned()).collect();
-            let feature_matrix = Matrix::new::<Vec<f64>>(samplecount, featurecount.unwrap(),flattened_features);
-            let predictor_vector = Vector::new(all_predictors);
-            //let predictor_vector = Vector::new(vec![0; 5]);
-            (feature_matrix, predictor_vector)
+
+            (all_features, all_predictors)
         }
     }
 }
