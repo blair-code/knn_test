@@ -42,14 +42,16 @@ pub mod knn_shapley {
 
         return Vector::new(shapleys);
     }
-    pub fn calculate_knn_shapleys(training_features: &Matrix<f64>, training_labels: &Vector<u32> , test_features: &Matrix<f64>, test_labels: &Vector<u32>, k: usize) {
+    pub fn calculate_knn_shapleys(training_features: &Matrix<f64>, training_labels: &Vector<u32> , test_features: &Matrix<f64>, test_labels: &Vector<u32>, k: usize) -> Vector<f64> {
         assert_eq!(training_features.rows(), training_labels.size());
         assert_eq!(test_features.rows(), test_labels.size());
         assert_eq!(training_features.cols(), test_features.cols());
 
-        test_features.iter_rows().enumerate()
+        let shap_from_dists: Vec<Vector<f64>> = test_features.iter_rows().enumerate()
                      .map(|(idx, row)| (idx, distance_from_sample(&training_features, &Vector::new(row)) ))
                      .map(|(idx, dist)| shapleys_from_distances(dist, training_labels, test_labels[idx], k))
-                     .fold(Vector::new(vec![0.0;training_labels.size()]), |sum_vec, shapleys| sum_vec + shapleys);
+                     .collect();
+        //shap_from_dists
+        shap_from_dists.iter().fold::<Vector<f64>,_>(Vector::new(vec![0.0;training_labels.size()]), |sum_vec, shapleys| sum_vec + shapleys)
     }
 }
