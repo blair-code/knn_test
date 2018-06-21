@@ -1,7 +1,7 @@
 extern crate rusty_machine;
 extern crate rulinalg;
 
-mod knn_shapley {
+pub mod knn_shapley {
     use knn_shapley::rusty_machine::linalg::Matrix;
     use knn_shapley::rusty_machine::linalg::Vector;
     use knn_shapley::rusty_machine::prelude::BaseMatrix;
