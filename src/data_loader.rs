@@ -1,12 +1,15 @@
 extern crate rusty_machine;
 extern crate rulinalg;
 extern crate csv;
+extern crate regex;
+extern crate image;
 
 pub mod data_loader {
 
     use data_loader::rusty_machine::linalg::Matrix;
     use data_loader::rusty_machine::linalg::Vector;
     use data_loader::csv;
+    use data_loader::regex::Regex;
 
     pub trait DataLoader {
         type Feature;
@@ -60,6 +63,35 @@ pub mod data_loader {
                     }
                     all_features.push(rec_vec.to_owned());
                 }
+            }
+
+            (all_features, all_predictors)
+        }
+    }
+
+    pub struct ImageLoader {
+        pub predictor_extract_regex: Regex
+    }
+
+    impl DataLoader for ImageLoader{
+        type Feature = f64;
+        type Predictor = u32;
+        fn load_all_samples(&self, filepaths: Vec<&str>) -> (Vec<Vec<Self::Feature>>, Vec<Self::Predictor>) {
+            
+            let mut all_features = Vec::new();
+            let mut all_predictors = Vec::new();
+
+            for path in filepaths.iter() {
+                let img = image::open(path).unwrap();
+                
+                all_features.push(img.raw_pixels());
+                
+                let filename = path.file_name.unwrap();
+                
+                let extracted_predictor_str = predictor_extract_regex.find(filename).unwrap().as_str();
+                let predictor = extracted_predictor_str::parse<Self::Predictor>().unwrap()
+
+                all_predictors.push(predictor);
             }
 
             (all_features, all_predictors)
