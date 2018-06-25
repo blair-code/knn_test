@@ -10,6 +10,8 @@ pub mod data_loader {
     use data_loader::rusty_machine::linalg::Vector;
     use data_loader::csv;
     use data_loader::regex::Regex;
+    use data_loader::image;
+    use std::path::Path;
 
     pub trait DataLoader {
         type Feature;
@@ -74,22 +76,23 @@ pub mod data_loader {
     }
 
     impl DataLoader for ImageLoader{
-        type Feature = f64;
+        type Feature = u8;
         type Predictor = u32;
         fn load_all_samples(&self, filepaths: Vec<&str>) -> (Vec<Vec<Self::Feature>>, Vec<Self::Predictor>) {
             
             let mut all_features = Vec::new();
             let mut all_predictors = Vec::new();
 
-            for path in filepaths.iter() {
+            for file_path in filepaths.iter() {
+                let path = Path::new(file_path);
                 let img = image::open(path).unwrap();
                 
                 all_features.push(img.raw_pixels());
                 
-                let filename = path.file_name.unwrap();
+                let filename = (*path).file_name().unwrap().to_str().unwrap();
                 
-                let extracted_predictor_str = predictor_extract_regex.find(filename).unwrap().as_str();
-                let predictor = extracted_predictor_str::parse<Self::Predictor>().unwrap()
+                let extracted_predictor_str = self.predictor_extract_regex.find(filename).unwrap().as_str();
+                let predictor = extracted_predictor_str.parse::<Self::Predictor>().unwrap();
 
                 all_predictors.push(predictor);
             }
