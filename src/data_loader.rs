@@ -77,7 +77,7 @@ pub mod data_loader {
     }
 
     impl DataLoader for ImageLoader{
-        type Feature = u8;
+        type Feature = f64;
         type Predictor = u32;
         fn load_all_samples(&self, filepaths: Vec<&str>) -> (Vec<Vec<Self::Feature>>, Vec<Self::Predictor>) {
             
@@ -88,7 +88,7 @@ pub mod data_loader {
                 let path = Path::new(file_path);
                 let img = image::open(path).unwrap();
                 
-                all_features.push(img.raw_pixels());
+                all_features.push(img.raw_pixels().iter().map(|pix| *pix as f64).collect());
                 
                 let filename = (*path).file_name().unwrap().to_str().unwrap();
                 let lookaround_match = self.predictor_extract_regex_lookaround.find(filename).unwrap().as_str();
