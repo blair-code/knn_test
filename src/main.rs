@@ -12,13 +12,14 @@ use rustlearn::cross_validation::{ShuffleSplit, CrossValidation};
 use regex::Regex;
 
 fn main() {
-    /*let path = "./iris.data.transf";
-    let ldr = CSVLoader{
+    let paths = vec!["./iris.data.transf.shard1",
+                     "./iris.data.transf.shard2"];
+    let ldr = CSVLoader{ 
         delimiter: b',',
         predictor_column_index: 4,
         has_headers: false
-    };*/
-    let paths = vec!["/home/f/Downloads/CatsAndDogs/id1_0.jpg",
+    };
+    /*let paths = vec!["/home/f/Downloads/CatsAndDogs/id1_0.jpg",
                      "/home/f/Downloads/CatsAndDogs/id2_0.jpg",
                      "/home/f/Downloads/CatsAndDogs/id3_0.jpg",
                      "/home/f/Downloads/CatsAndDogs/id4_1.jpg",
@@ -28,7 +29,7 @@ fn main() {
     let ldr = ImageLoader{
         predictor_extract_regex_lookaround: regex::Regex::new(r#"_[0,1].jpg"#).unwrap(),
         predictor_extract_regex_exact: regex::Regex::new(r#"[0,1]"#).unwrap()
-    };
+    };*/
 
     let (features, predictors) = ldr.load_all_samples(paths);
     let X = ldr.vecs_as_matrix(features);
@@ -39,7 +40,6 @@ fn main() {
 
     let mut split_shapleys = Matrix::zeros(num_splits, X.rows());
 
-    println!("{:?}", split_shapleys.get_row(0));
     //for (train_idx, test_idx) in ShuffleSplit::new(X.rows(), num_splits, test_percentage) {
     for (split_index, (train_idx, test_idx)) in CrossValidation::new(X.rows(), num_splits).enumerate() {
         let X_train = X.select_rows(&train_idx);
