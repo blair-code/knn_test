@@ -72,7 +72,8 @@ pub mod data_loader {
     }
 
     pub struct ImageLoader {
-        pub predictor_extract_regex: Regex
+        pub predictor_extract_regex_lookaround: Regex,
+        pub predictor_extract_regex_exact: Regex
     }
 
     impl DataLoader for ImageLoader{
@@ -90,9 +91,9 @@ pub mod data_loader {
                 all_features.push(img.raw_pixels());
                 
                 let filename = (*path).file_name().unwrap().to_str().unwrap();
-                
-                let extracted_predictor_str = self.predictor_extract_regex.find(filename).unwrap().as_str();
-                let predictor = extracted_predictor_str.parse::<Self::Predictor>().unwrap();
+                let lookaround_match = self.predictor_extract_regex_lookaround.find(filename).unwrap().as_str();
+                let extracted_predictor = self.predictor_extract_regex_exact.find(lookaround_match).unwrap().as_str();
+                let predictor = extracted_predictor.parse::<Self::Predictor>().unwrap();
 
                 all_predictors.push(predictor);
             }

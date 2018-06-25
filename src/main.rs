@@ -1,25 +1,38 @@
 extern crate rustlearn;
 extern crate rusty_machine;
+extern crate regex;
 
 mod data_loader;
 mod knn_shapley;
 
 use rusty_machine::prelude::{BaseMatrix, BaseMatrixMut, Vector, Matrix};
-use data_loader::data_loader::{CSVLoader, DataLoader};
+use data_loader::data_loader::{CSVLoader, ImageLoader, DataLoader};
 use knn_shapley::knn_shapley::*;
 use rustlearn::cross_validation::{ShuffleSplit, CrossValidation};
+use regex::Regex;
 
 fn main() {
-    let path = "./iris.data.transf";
-    let csv_ldr = CSVLoader{
+    /*let path = "./iris.data.transf";
+    let ldr = CSVLoader{
         delimiter: b',',
         predictor_column_index: 4,
         has_headers: false
+    };*/
+    let paths = vec!["/home/f/Downloads/CatsAndDogs/id1_0.jpg",
+                     "/home/f/Downloads/CatsAndDogs/id2_0.jpg",
+                     "/home/f/Downloads/CatsAndDogs/id3_0.jpg",
+                     "/home/f/Downloads/CatsAndDogs/id4_1.jpg",
+                     "/home/f/Downloads/CatsAndDogs/id5_1.jpg",
+                     "/home/f/Downloads/CatsAndDogs/id6_0.jpg",
+                     "/home/f/Downloads/CatsAndDogs/id7_0.jpg"];
+    let ldr = ImageLoader{
+        predictor_extract_regex_lookaround: regex::Regex::new(r#"_[0,1].jpg"#).unwrap(),
+        predictor_extract_regex_exact: regex::Regex::new(r#"[0,1]"#).unwrap()
     };
 
-    let (features, predictors) = csv_ldr.load_all_samples(vec![path]);
-    let X = csv_ldr.vecs_as_matrix(features);
-    let y = csv_ldr.vec_as_vector(predictors);
+    let (features, predictors) = ldr.load_all_samples(paths);
+    let X = ldr.vecs_as_matrix(features);
+    let y = ldr.vec_as_vector(predictors);
 
     let num_splits = 5;
     let test_percentage = 0.2;
@@ -46,5 +59,4 @@ fn main() {
     }
     let cv_shapleys: Vec<f64> = split_shapleys.sum_rows().iter().map(|shapley_sum| shapley_sum/((num_splits-1) as f64)).collect(); 
     println!("{:?}", cv_shapleys);
-    //println!("{:?}", split_shapleys.get_row(0));
 }
