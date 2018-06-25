@@ -53,9 +53,6 @@ fn main() {
         for (i, item) in train_idx.iter().enumerate() {
             row_slice[*item] = shapleys[i];
         }
-        // TODO Use indicator matrix to track which shapley values are set and which are just the default 0
-        // TODO Average over columns to get shapley value of each sample (avg only over indicated values)
-
     }
     let cv_shapleys: Vec<f64> = split_shapleys.sum_rows().iter().map(|shapley_sum| shapley_sum/((num_splits-1) as f64)).collect(); 
     println!("{:?}", cv_shapleys);
