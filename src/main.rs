@@ -26,6 +26,7 @@ fn main() {
 
     let mut split_shapleys = Matrix::zeros(num_splits, X.rows());
 
+    println!("{:?}", split_shapleys.get_row(0));
     //for (train_idx, test_idx) in ShuffleSplit::new(X.rows(), num_splits, test_percentage) {
     for (split_index, (train_idx, test_idx)) in CrossValidation::new(X.rows(), num_splits).enumerate() {
         let X_train = X.select_rows(&train_idx);
@@ -43,5 +44,7 @@ fn main() {
         // TODO Average over columns to get shapley value of each sample (avg only over indicated values)
 
     }
-    println!("{:?}", split_shapleys);
+    let cv_shapleys: Vec<f64> = split_shapleys.sum_rows().iter().map(|shapley_sum| shapley_sum/((num_splits-1) as f64)).collect(); 
+    println!("{:?}", cv_shapleys);
+    //println!("{:?}", split_shapleys.get_row(0));
 }
